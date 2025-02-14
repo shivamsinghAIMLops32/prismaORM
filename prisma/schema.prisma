@@ -21,9 +21,9 @@ model Todo{
   id Int @default(autoincrement()) @id
   title String
   description String
-  done Boolean
+  done Boolean @default(false)
 
   // relating too users table
   userId Int
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id],onDelete: Cascade) 
 }
