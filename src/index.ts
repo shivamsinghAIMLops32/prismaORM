@@ -21,7 +21,7 @@ app.get('api/v1/todos/:id', async (req, res) => {
           id: Number(id)
         },
         select:{
-            id: true,
+            id: true, 
             username: true,
             age: true,
             city: true,
