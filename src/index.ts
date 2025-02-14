@@ -1,60 +1,57 @@
+import express from 'express';
 import { User } from './../node_modules/.prisma/client/index.d';
 import { PrismaClient } from "@prisma/client";
 
+const app = express();
 const client = new PrismaClient();
 
-async function createUser() {
 
-await client.user.create({
-    data: {
-        username: 'Alice',
-        password: 'password',
-        age:20,
-        city:"delhi",
-        todos: {
-            create: [
-                { title: 'First post', description: 'This is the first post.',done: true },
-                { title: 'Second post', description: 'This is the second post.',done:false }
-            ]
-        }
-    }
+app.use(express.json());
+
+// get all users
+app.get('api/v1/users', async (req, res) => {
+    const users = await client.user.findMany();
+    res.json({users});
 })
-}
-
-async function deleteUser() {
-
-    // dleted a user
-    await client.user.delete({
-       where:{
-        id:3
-       }
-    })
-}
-    
-
-// findig user by id
-async function findUser() {
-    const user = await client.user.findFirst({
+// get all users for specific id
+app.get('api/v1/todos/:id', async (req, res) => {
+    const id = req.params.id;
+    const user = await client.user.findUnique({
         where:{
-            id:3
+          id: Number(id)
         },
         select:{
-            id:true,
-            username:true,
-            age:true,
-            city:true,
-            todos:{
-                select:{
-                    title:true,
-                    description:true,
-                    done:true
+            id: true,
+            username: true,
+            age: true,
+            city: true,
+            todos: true
+        }
+    });
+    res.json({user});
+})
+
+// Create user
+app.post("api/v1/user/:id",async (req,res)=>{
+    const {username,password,age,city,todos}= req.body;
+    const newUser = await client.user.create({
+        data:{
+            username,
+            password,
+            age,
+            city,
+            todos: {
+                createMany:{
+                    data:[
+                        {title:"Learn Node.js",description:"Node.js tutorial",done:false},
+                        {title:"Learn React",description:"React tutorial",done:false}
+                    ]
                 }
             }
         }
     })
-    console.log(user?.age+"/"+user?.username);
-}
+    res.status(201).send("User created successfully");
+})
 
-// createUser();
-// findUser();
-deleteUser();
+
+app.listen(4000);
